@@ -45,7 +45,6 @@ public class OffsetMessageParser extends MessageParser {
         long offsetsPerPartition = mConfig.getOffsetsPerPartition();
         long partition = (offset / offsetsPerPartition) * offsetsPerPartition;
         String payload = new String(message.getPayload());
-        System.out.print("MessageParser called!! -- OffsetMessageParser");
         JsonObject obj = new JsonParser().parse(payload).getAsJsonObject();
 
         String dbName = obj.get("DBname").getAsString();

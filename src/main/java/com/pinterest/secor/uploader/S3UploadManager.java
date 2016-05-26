@@ -85,7 +85,7 @@ public class S3UploadManager extends UploadManager {
         final String awsRole = mConfig.getAwsRole();
 
         s3Path = mConfig.getS3Path();
-        System.out.println("S3PATH---"+s3Path);
+        LOG.info("S3PATH---"+s3Path);
         AmazonS3 client;
         AWSCredentialsProvider provider;
 

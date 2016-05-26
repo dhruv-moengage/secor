@@ -66,7 +66,7 @@ public class MessageWriter {
     }
 
     public void adjustOffset(Message message) throws IOException {
-        System.out.println("MessageWriter called!! - adjustOffset()");
+        //System.out.println("MessageWriter called!! - adjustOffset()");
         TopicPartition topicPartition = new TopicPartition(message.getTopic(),
                                                            message.getKafkaPartition());
         long lastSeenOffset = mOffsetTracker.getLastSeenOffset(topicPartition);
@@ -83,7 +83,7 @@ public class MessageWriter {
     }
 
     public void write(ParsedMessage message) throws Exception {
-        System.out.println("MessageWriter called!! - write()");
+        //System.out.println("MessageWriter called!! - write()");
         TopicPartition topicPartition = new TopicPartition(message.getTopic(),
                                                            message.getKafkaPartition());
         long offset = mOffsetTracker.getAdjustedCommittedOffsetCount(topicPartition);

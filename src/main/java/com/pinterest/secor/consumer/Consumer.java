@@ -151,7 +151,13 @@ public class Consumer extends Thread {
             try {
                 String rawMessageString = new String(rawMessage.getPayload());
                 JsonObject obj = new JsonParser().parse(rawMessageString).getAsJsonObject();
-                JsonArray eventArray = obj.getAsJsonArray("action");
+                JsonArray eventArray = null;
+                eventArray = obj.getAsJsonArray("action");
+                String messageType = "action";
+                if(eventArray == null){
+                    eventArray = obj.getAsJsonArray("notic");
+                    messageType = "notic";
+                }
                 size = eventArray.size();
 
 
@@ -162,7 +168,10 @@ public class Consumer extends Thread {
                 JsonObject subMessage = new JsonObject();
                 subMessage.addProperty("e", ((JsonObject) eventArray.get(i)).get("n").getAsString());
                 subMessage.addProperty("t", ((JsonObject) eventArray.get(i)).get("t").getAsLong());
-                subMessage.add("a", ((JsonObject) eventArray.get(i)).get("a").getAsJsonObject());
+                if(messageType.equals("action"))
+                    subMessage.add("a", ((JsonObject) eventArray.get(i)).get("a").getAsJsonObject());
+                else
+                    subMessage.addProperty("a",((JsonObject) eventArray.get(i)).get("cid").getAsString());
                 subMessage.addProperty("unique_id", obj.get("unique_id").getAsString());
                 subMessage.addProperty("sdk", obj.get("sdk").getAsString());
                 subMessage.addProperty("user_id", obj.get("user_id").getAsString());
@@ -175,7 +184,8 @@ public class Consumer extends Thread {
 
                 Message transformedMessage = mMessageTransformer.transform(message);
                 parsedMessage = mMessageParser.parse(transformedMessage);
-                System.out.println("-----------------------Payload-------"+new String(parsedMessage.getPayload()));
+                LOG.info("MessageWriteSuccess!!"+new String(parsedMessage.getPayload()));
+                //System.out.println("-----------------------Payload-------"+new String(parsedMessage.getPayload()));
                 final double DECAY = 0.999;
                 mUnparsableMessages *= DECAY;
 

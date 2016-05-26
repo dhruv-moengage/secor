@@ -171,7 +171,7 @@ public class MessageReader {
         // Skip already committed messages.
         long committedOffsetCount = mOffsetTracker.getTrueCommittedOffsetCount(topicPartition);
         LOG.debug("read message {}", message);
-        System.out.println("MessageReader called! - "+message);
+        //System.out.println("MessageReader called! - "+message);
         if (mNMessages % mCheckMessagesPerSecond == 0) {
             exportStats();
         }

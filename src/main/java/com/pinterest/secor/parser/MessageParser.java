@@ -82,26 +82,9 @@ public abstract class MessageParser {
             {
 
             }
-
-            //List[] list = listFromJsonSorted(output.getJSONObject("a"));
             String csv = "";
 
             int i =0;
-//            while(i<list[1].size()) {
-//                if (csv.equals(""))
-//                    csv += list[1].get(i);
-//                else
-//                    csv += "," + list[1].get(i);
-//
-//                if (title.equals(""))
-//                    title += list[0].get(i);
-//                else
-//                    title += "," + list[0].get(i);
-//
-//
-//                i++;
-//            }
-
 
             String unique_id = output.getString("unique_id");
             String sdk = output.getString("sdk");
@@ -133,7 +116,7 @@ public abstract class MessageParser {
         }
         catch(Exception e)
         {
-            System.out.print("Error"+e.getMessage());
+            LOG.error("Error----"+e.getMessage());
         }
         return returnMessage;
     }
