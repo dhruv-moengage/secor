@@ -124,7 +124,7 @@ public class DelimitedTextFileReaderWriterFactory implements FileReaderWriterFac
         public void write(KeyValue keyValue) throws IOException {
             try {
                 this.mWriter.write(keyValue.getValue());
-                System.out.println("<><><><>OUTPUT-----BUFFER<><><><>" + new String(keyValue.getValue()));
+                //System.out.println("<><><><>OUTPUT-----BUFFER<><><><>" + new String(keyValue.getValue()));
                 this.mWriter.write(DELIMITER);
             }
             catch(Exception e)

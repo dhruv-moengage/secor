@@ -106,8 +106,8 @@ public abstract class MessageParser {
             returnMessage = new Message(message.getTopic(), message.getKafkaPartition(),
                     message.getOffset(), message.getKafkaKey(), csv.getBytes(Charset.forName("UTF-8")));
 
-            File file1 = FileUtils.getFile("~/Documents/keyMappings.txt");
-            FileUtils.write(file1,key+"="+value+"\n",true);
+            //File file1 = FileUtils.getFile("~/Documents/keyMappings.txt");
+            //FileUtils.write(file1,key+"="+value+"\n",true);
             //File file2 = FileUtils.getFile("~/Documents/eventAttributes.txt");
             //FileUtils.write(file2,"dbName="+dBname+"_"+"event="+event+"-->"+title);
 
