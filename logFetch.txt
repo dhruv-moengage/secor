@@ -1,0 +1,8 @@
+S3PATH---folder/subfolder
+S3PATH---folder/subfolder
+S3PATH---folder/subfolder
+S3PATH---folder/subfolder
+S3PATH---folder/subfolder
+S3PATH---folder/subfolder
+S3PATH---folder/subfolder
+XOMESSAGE-{"DBname":"Zumba"}

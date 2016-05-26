@@ -85,7 +85,7 @@ public class S3UploadManager extends UploadManager {
         final String awsRole = mConfig.getAwsRole();
 
         s3Path = mConfig.getS3Path();
-
+        System.out.println("S3PATH---"+s3Path);
         AmazonS3 client;
         AWSCredentialsProvider provider;
 
@@ -167,6 +167,8 @@ public class S3UploadManager extends UploadManager {
         } else {
             LOG.info("uploading file {} to s3://{}/{} with no encryption", localFile, s3Bucket, s3Key);
         }
+
+        System.out.println("UploadManager called!! - S3UploadManager");
 
         Upload upload = mManager.upload(uploadRequest);
         return new S3UploadHandle(upload);

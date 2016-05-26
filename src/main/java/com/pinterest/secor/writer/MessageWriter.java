@@ -16,11 +16,7 @@
  */
 package com.pinterest.secor.writer;
 
-import com.pinterest.secor.common.FileRegistry;
-import com.pinterest.secor.common.LogFilePath;
-import com.pinterest.secor.common.OffsetTracker;
-import com.pinterest.secor.common.SecorConfig;
-import com.pinterest.secor.common.TopicPartition;
+import com.pinterest.secor.common.*;
 import com.pinterest.secor.io.FileWriter;
 import com.pinterest.secor.io.KeyValue;
 import com.pinterest.secor.message.Message;
@@ -42,13 +38,13 @@ import java.io.IOException;
 public class MessageWriter {
     private static final Logger LOG = LoggerFactory.getLogger(MessageWriter.class);
 
-    private SecorConfig mConfig;
-    private OffsetTracker mOffsetTracker;
-    private FileRegistry mFileRegistry;
-    private String mFileExtension;
-    private CompressionCodec mCodec;
-    private String mLocalPrefix;
-    private final int mGeneration;
+    protected SecorConfig mConfig;
+    protected OffsetTracker mOffsetTracker;
+    protected FileRegistry mFileRegistry;
+    protected String mFileExtension;
+    protected CompressionCodec mCodec;
+    protected String mLocalPrefix;
+    protected final int mGeneration;
 
     public MessageWriter(SecorConfig config, OffsetTracker offsetTracker,
                          FileRegistry fileRegistry) throws Exception {
@@ -70,6 +66,7 @@ public class MessageWriter {
     }
 
     public void adjustOffset(Message message) throws IOException {
+        System.out.println("MessageWriter called!! - adjustOffset()");
         TopicPartition topicPartition = new TopicPartition(message.getTopic(),
                                                            message.getKafkaPartition());
         long lastSeenOffset = mOffsetTracker.getLastSeenOffset(topicPartition);
@@ -86,6 +83,7 @@ public class MessageWriter {
     }
 
     public void write(ParsedMessage message) throws Exception {
+        System.out.println("MessageWriter called!! - write()");
         TopicPartition topicPartition = new TopicPartition(message.getTopic(),
                                                            message.getKafkaPartition());
         long offset = mOffsetTracker.getAdjustedCommittedOffsetCount(topicPartition);

@@ -21,6 +21,8 @@ public class IdentityMessageTransformer implements MessageTransformer {
     }
     @Override
     public Message transform(Message message) {
+
+        System.out.println("MessageTransformer Called!!");
         return message;
     }
 }

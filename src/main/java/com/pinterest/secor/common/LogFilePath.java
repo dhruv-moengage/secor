@@ -134,12 +134,14 @@ public class LogFilePath {
         return StringUtils.join(elements, "/");
     }
 
-    private String getLogFileBasename() {
+    public String getLogFileBasename() {
+        //Edited final logFileName as date
         ArrayList<String> basenameElements = new ArrayList<String>();
         basenameElements.add(Integer.toString(mGeneration));
         basenameElements.add(Integer.toString(mKafkaPartition));
         basenameElements.add(String.format("%020d", mOffset));
         return StringUtils.join(basenameElements, "_");
+
     }
 
     public String getLogFilePath() {

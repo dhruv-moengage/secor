@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -13,23 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include=secor.prod.properties
+# Author: Pawel Garbacki (pawel@pinterest.com)
 
-# Name of the Kafka consumer group.
-secor.kafka.group=secor_backup_group
+CURR_DIR=`dirname $0`
+source ${CURR_DIR}/run_common.sh
 
-# Parser class that extracts partitions from consumed messages.
-secor.message.parser.class=com.pinterest.secor.parser.OffsetMessageParser
-
-# S3 path where sequence files are stored.
-secor.s3.path=analytics
-
-# Swift path where sequence files are stored.
-secor.swift.path=
-
-# Local path where sequence files are stored before they are uploaded to s3.
-secor.local.path=/data/secor_data/message_logs/backup
-
-# Port of the Ostrich server.
-ostrich.port=9999
-
+${JAVA} -ea -cp "$CLASSPATH" org.apache.zookeeper.ZooKeeperMain -server $@

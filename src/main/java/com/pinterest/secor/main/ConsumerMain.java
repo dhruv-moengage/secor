@@ -51,6 +51,7 @@ public class ConsumerMain {
             return;
         }
         try {
+            System.out.println("ConsumerMain class!");
             SecorConfig config = SecorConfig.load();
             OstrichAdminService ostrichService = new OstrichAdminService(config.getOstrichPort());
             ostrichService.start();

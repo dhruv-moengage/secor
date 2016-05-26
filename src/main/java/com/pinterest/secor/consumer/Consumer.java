@@ -16,6 +16,9 @@
  */
 package com.pinterest.secor.consumer;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.pinterest.secor.common.FileRegistry;
 import com.pinterest.secor.common.OffsetTracker;
 import com.pinterest.secor.common.SecorConfig;
@@ -29,6 +32,7 @@ import com.pinterest.secor.reader.MessageReader;
 import com.pinterest.secor.util.ReflectionUtil;
 import com.pinterest.secor.writer.MessageWriter;
 
+import com.pinterest.secor.writer.MessageWriterWrap;
 import kafka.consumer.ConsumerTimeoutException;
 
 import org.slf4j.Logger;
@@ -36,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.Thread;
-
+import java.nio.charset.Charset;
 /**
  * Consumer is a top-level component coordinating reading, writing, and uploading Kafka log
  * messages.  It is implemented as a thread with the intent of running multiple consumer
@@ -84,10 +88,12 @@ public class Consumer extends Thread {
         try {
             // init() cannot be called in the constructor since it contains logic dependent on the
             // thread id.
+            System.out.println("Consumer run() - NEW CONSUMER CREATED!");
             init();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize the consumer", e);
         }
+
         // check upload policy every N seconds or 10,000 messages/consumer timeouts
         long checkEveryNSeconds = Math.min(10 * 60, mConfig.getMaxFileAgeSeconds() / 2);
         long checkMessagesPerSecond = mConfig.getMessagesPerSecond();
@@ -138,37 +144,77 @@ public class Consumer extends Thread {
             } catch (IOException e) {
                 throw new RuntimeException("Failed to adjust offset.", e);
             }
-            ParsedMessage parsedMessage = null;
+
+
+            //Split the message to subparts - eventParts
+            int size = 0;
             try {
-                Message transformedMessage = mMessageTransformer.transform(rawMessage);
+                String rawMessageString = new String(rawMessage.getPayload());
+                JsonObject obj = new JsonParser().parse(rawMessageString).getAsJsonObject();
+                JsonArray eventArray = obj.getAsJsonArray("action");
+                size = eventArray.size();
+
+
+            int i = 0;
+            while (i < size) {
+                ParsedMessage parsedMessage = null;
+
+                JsonObject subMessage = new JsonObject();
+                subMessage.addProperty("e", ((JsonObject) eventArray.get(i)).get("n").getAsString());
+                subMessage.addProperty("t", ((JsonObject) eventArray.get(i)).get("t").getAsLong());
+                subMessage.add("a", ((JsonObject) eventArray.get(i)).get("a").getAsJsonObject());
+                subMessage.addProperty("unique_id", obj.get("unique_id").getAsString());
+                subMessage.addProperty("sdk", obj.get("sdk").getAsString());
+                subMessage.addProperty("user_id", obj.get("user_id").getAsString());
+                subMessage.addProperty("DBname", obj.get("DBname").getAsString());
+                String subMessageString = subMessage.toString();
+                Message message = new Message(rawMessage.getTopic(), rawMessage.getKafkaPartition(),
+                        rawMessage.getOffset(), rawMessage.getKafkaKey(), subMessageString.getBytes(Charset.forName("UTF-8")));
+
+                //Parse eventParts and write to corresponding files
+
+                Message transformedMessage = mMessageTransformer.transform(message);
                 parsedMessage = mMessageParser.parse(transformedMessage);
+                System.out.println("-----------------------Payload-------"+new String(parsedMessage.getPayload()));
                 final double DECAY = 0.999;
                 mUnparsableMessages *= DECAY;
-            } catch (Throwable e) {
-                mUnparsableMessages++;
-                final double MAX_UNPARSABLE_MESSAGES = 1000.;
-                if (mUnparsableMessages > MAX_UNPARSABLE_MESSAGES) {
-                    throw new RuntimeException("Failed to parse message " + rawMessage, e);
+
+
+                if (parsedMessage != null) {
+                    try {
+                        mMessageWriter.write(parsedMessage);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to write message " + parsedMessage, e);
+                    }
                 }
-                LOG.warn("Failed to parse message {}", rawMessage, e);
+                i++;
+
             }
 
-            if (parsedMessage != null) {
-                try {
-                    mMessageWriter.write(parsedMessage);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to write message " + parsedMessage, e);
-                }
+        }catch (Throwable e) {
+            mUnparsableMessages++;
+            final double MAX_UNPARSABLE_MESSAGES = 1000.;
+            if (mUnparsableMessages > MAX_UNPARSABLE_MESSAGES) {
+                throw new RuntimeException("Failed to parse message " + rawMessage, e);
             }
+            LOG.warn("Failed to parse message {}", rawMessage, e);
+        }
+
+
+
+
+
+
+
+
+
         }
         return true;
     }
 
     /**
      * Helper to get the offset tracker (used in tests)
-     * 
-     * @param topic
-     * @param partition
+     *
      * @return
      */
     public OffsetTracker getOffsetTracker() {

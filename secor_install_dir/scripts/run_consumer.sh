@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -13,23 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include=secor.prod.properties
+# Author: Pawel Garbacki (pawel@pinterest.com)
 
-# Name of the Kafka consumer group.
-secor.kafka.group=secor_backup_group
+mkdir -p /mnt/secor_data/logs
 
-# Parser class that extracts partitions from consumed messages.
-secor.message.parser.class=com.pinterest.secor.parser.OffsetMessageParser
+CURR_DIR=`dirname $0`
+source ${CURR_DIR}/run_common.sh
 
-# S3 path where sequence files are stored.
-secor.s3.path=analytics
+echo "starting backup group"
+nohup ${JAVA} -ea -Dsecor_group=backup -Dlog4j.configuration=log4j.prod.properties \
+    -Dconfig=secor.prod.backup.properties -cp "secor-0.1-SNAPSHOT.jar:lib/*" \
+    com.pinterest.secor.main.ConsumerMain > /mnt/secor_data/logs/run_consumer_backup.log 2>&1 &
 
-# Swift path where sequence files are stored.
-secor.swift.path=
-
-# Local path where sequence files are stored before they are uploaded to s3.
-secor.local.path=/data/secor_data/message_logs/backup
-
-# Port of the Ostrich server.
-ostrich.port=9999
-
+echo "starting partition group"
+nohup ${JAVA} -ea -Dsecor_group=partition -Dlog4j.configuration=log4j.prod.properties \
+    -Dconfig=secor.prod.partition.properties -cp "secor-0.1-SNAPSHOT.jar:lib/*" \
+    com.pinterest.secor.main.ConsumerMain > /mnt/secor_data/logs/run_secor_partition.log 2>&1 &

@@ -85,6 +85,7 @@ public class Uploader {
             "locks",
             topicPartition.getTopic(),
             topicPartition.getPartition());
+        System.out.println("Uploader Called--uploadFiles()");
 
         mZookeeperConnector.lock(lockPath);
         try {
@@ -109,6 +110,7 @@ public class Uploader {
             }
         } finally {
             mZookeeperConnector.unlock(lockPath);
+
         }
     }
 

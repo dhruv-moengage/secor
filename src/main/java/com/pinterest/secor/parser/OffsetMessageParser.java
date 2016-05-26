@@ -16,8 +16,18 @@
  */
 package com.pinterest.secor.parser;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.pinterest.secor.common.SecorConfig;
 import com.pinterest.secor.message.Message;
+import com.sun.tools.classfile.Code_attribute;
+import org.apache.commons.io.FileUtils;
+import org.json.CDL;
+import org.json.JSONArray;
+
+import java.io.File;
+import java.nio.charset.Charset;
 
 /**
  * Offset message parser groups messages based on the offset ranges.
@@ -34,7 +44,19 @@ public class OffsetMessageParser extends MessageParser {
         long offset = message.getOffset();
         long offsetsPerPartition = mConfig.getOffsetsPerPartition();
         long partition = (offset / offsetsPerPartition) * offsetsPerPartition;
-        String[] result = {"offset=" + partition};
+        String payload = new String(message.getPayload());
+        System.out.print("MessageParser called!! -- OffsetMessageParser");
+        JsonObject obj = new JsonParser().parse(payload).getAsJsonObject();
+
+        String dbName = obj.get("DBname").getAsString();
+        String event = obj.get("e").getAsString();
+        dbName = dbName.replaceAll(" ","-");
+        event = event.replaceAll(" ","-");
+        String timeStamp = new java.text.SimpleDateFormat("dd-MM-yyyy").format(new java.util.Date());
+
+        String[] result = {"dbName=" + dbName,"event="+event,timeStamp};
         return result;
     }
+
+
 }
