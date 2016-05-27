@@ -16,7 +16,9 @@
  */
 package com.pinterest.secor.consumer;
 
+import com.google.api.client.json.Json;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.pinterest.secor.common.FileRegistry;
@@ -152,11 +154,33 @@ public class Consumer extends Thread {
                 String rawMessageString = new String(rawMessage.getPayload());
                 JsonObject obj = new JsonParser().parse(rawMessageString).getAsJsonObject();
                 JsonArray eventArray = null;
-                eventArray = obj.getAsJsonArray("action");
-                String messageType = "action";
-                if(eventArray == null){
-                    eventArray = obj.getAsJsonArray("notic");
-                    messageType = "notic";
+                JsonArray eventArrayAction = null;
+                JsonArray eventArrayNotic = null;
+
+                eventArrayAction = obj.getAsJsonArray("action");
+                eventArrayNotic = obj.getAsJsonArray("notic");
+                if(eventArrayAction != null && eventArrayNotic!=null)
+                {
+                    eventArray = eventArrayAction;
+                    int i =0;
+                    while(i<eventArrayNotic.size())
+                    {
+                        eventArray.add(eventArrayNotic.get(i));
+                        i++;
+                    }
+
+                }
+                else
+                {
+                    if(eventArrayAction==null)
+                    {
+                        eventArray = eventArrayNotic;
+                    }
+                    else
+                    {
+                        eventArray = eventArrayAction;
+                    }
+
                 }
                 size = eventArray.size();
 
@@ -166,13 +190,43 @@ public class Consumer extends Thread {
                 ParsedMessage parsedMessage = null;
 
                 JsonObject subMessage = new JsonObject();
+                String na = "NA";
+                JsonObject temporaryAttributes = null;
+                String temporaryCid = null;
+                String unique = null;
                 subMessage.addProperty("e", ((JsonObject) eventArray.get(i)).get("n").getAsString());
                 subMessage.addProperty("t", ((JsonObject) eventArray.get(i)).get("t").getAsLong());
-                if(messageType.equals("action"))
-                    subMessage.add("a", ((JsonObject) eventArray.get(i)).get("a").getAsJsonObject());
+                JsonElement temp1 = ((JsonObject) eventArray.get(i)).get("a");
+                if(temp1==null)
+                    temporaryAttributes = null;
                 else
-                    subMessage.addProperty("a",((JsonObject) eventArray.get(i)).get("cid").getAsString());
-                subMessage.addProperty("unique_id", obj.get("unique_id").getAsString());
+                    temporaryAttributes = temp1.getAsJsonObject();
+                JsonElement temp2 = ((JsonObject) eventArray.get(i)).get("cid");
+                if(temp2==null)
+                    temporaryCid = null;
+                else
+                    temporaryCid = temp2.getAsString();
+                if(temporaryAttributes == null && temporaryCid == null)
+                    subMessage.addProperty("a",na);
+                else
+                {
+                    if(temporaryAttributes == null)
+                        subMessage.addProperty("a",temporaryCid);
+                    else if(temporaryCid == null)
+                        subMessage.add("a",temporaryAttributes);
+                    else
+                        throw new RuntimeException("Failed to parse message " + rawMessageString);
+                }
+                JsonElement temp3 = obj.get("unique_id");
+                if(temp3==null)
+                    unique = null;
+                else
+                    unique = obj.get("unique_id").getAsString();
+
+                if(unique == null)
+                    subMessage.addProperty("unique_id",na);
+                else
+                    subMessage.addProperty("unique_id", unique);
                 subMessage.addProperty("sdk", obj.get("sdk").getAsString());
                 subMessage.addProperty("user_id", obj.get("user_id").getAsString());
                 subMessage.addProperty("DBname", obj.get("DBname").getAsString());

@@ -51,6 +51,8 @@ public class OffsetMessageParser extends MessageParser {
         String event = obj.get("e").getAsString();
         dbName = dbName.replaceAll(" ","-");
         event = event.replaceAll(" ","-");
+        event = event.replaceAll("|","-");
+        event = event.replaceAll(":","-");
         String timeStamp = new java.text.SimpleDateFormat("dd-MM-yyyy").format(new java.util.Date());
 
         String[] result = {"dbName=" + dbName,"event="+event,timeStamp};
