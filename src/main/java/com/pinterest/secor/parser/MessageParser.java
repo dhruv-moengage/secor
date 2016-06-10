@@ -98,7 +98,9 @@ public abstract class MessageParser {
             String value = user_id+","+sdk;
             String key = machineName+"-"+String.valueOf(System.currentTimeMillis());
 
-            csv+=String.valueOf(timestamp)+","+unique_id+","+attributes+","+user_id+","+sdk;
+            attributes = attributes.replaceAll("\\;","-");
+
+            csv+=String.valueOf(timestamp)+";"+unique_id+";"+attributes+";"+user_id+";"+sdk;
 
 
 
